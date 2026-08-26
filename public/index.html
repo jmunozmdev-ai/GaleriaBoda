@@ -54,13 +54,19 @@
         <h1 id="greetingText">📸 Galería en Vivo</h1>
         <p>Sube tu mejor momento sin perder calidad</p>
 
-        <div>
+        <!-- Contenedor de botones -->
+        <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
             <label class="cam-button" for="cameraInput">
                 📷 Tomar Foto
             </label>
             <input type="file" id="cameraInput" accept="image/*" capture="environment">
-        </div>
 
+            <!-- NUEVO BOTÓN: Sin el atributo 'capture' para que abra la galería -->
+            <label class="cam-button" for="galleryInput" style="background-color: #38ada9; font-size: 20px; padding: 15px 30px;">
+                📁 Subir de Galería
+            </label>
+            <input type="file" id="galleryInput" accept="image/*">
+        </div>
         <h3 id="statusText" style="margin-top: 30px; transition: 0.3s;"></h3>
 
         <!-- Contenedor dinámico de la galería -->

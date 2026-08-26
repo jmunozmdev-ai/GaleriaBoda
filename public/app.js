@@ -23,22 +23,25 @@ function activarApp(nombre) {
     loadGallery(); // Cargamos las fotos en cuanto entran
 }
 
-// --- LÓGICA DE SUBIDA DE CÁMARA ---
-document.getElementById('cameraInput').addEventListener('change', async (event) => {
+// --- LÓGICA DE SUBIDA ---
+async function procesarSubida(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const currentUser = localStorage.getItem('galeria_user') || 'Anónimo';
     const statusText = document.getElementById('statusText');
-    const labelButton = document.querySelector('.cam-button');
+    const botones = document.querySelectorAll('.cam-button');
     
     statusText.innerText = "⏳ Subiendo tu foto...";
     statusText.style.color = "#ffdd59";
-    labelButton.style.opacity = "0.5";
-    labelButton.style.pointerEvents = "none";
+    
+    // Desactivar ambos botones mientras sube
+    botones.forEach(btn => {
+        btn.style.opacity = "0.5";
+        btn.style.pointerEvents = "none";
+    });
 
     try {
-        // Le pasamos el nombre al backend para que firme la foto con él
         const signResponse = await fetch(`/api/sign?user=${encodeURIComponent(currentUser)}`);
         const signData = await signResponse.json();
 
@@ -47,7 +50,7 @@ document.getElementById('cameraInput').addEventListener('change', async (event) 
         formData.append("api_key", signData.apiKey);
         formData.append("timestamp", signData.timestamp);
         formData.append("signature", signData.signature);
-        formData.append("context", signData.context); // <-- Adjuntamos el metadato del autor
+        formData.append("context", signData.context); 
 
         const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloudName}/image/upload`, {
             method: "POST",
@@ -59,7 +62,7 @@ document.getElementById('cameraInput').addEventListener('change', async (event) 
         if (uploadData.secure_url) {
             statusText.innerText = "✅ ¡Foto subida!";
             statusText.style.color = "#0be881";
-            loadGallery(); // Recargamos la galería para ver la nueva foto
+            loadGallery(); 
         } else {
             throw new Error("Error en Cloudinary");
         }
@@ -67,11 +70,18 @@ document.getElementById('cameraInput').addEventListener('change', async (event) 
         statusText.innerText = "❌ Error al subir. Intenta de nuevo.";
         statusText.style.color = "#ff4757";
     } finally {
-        labelButton.style.opacity = "1";
-        labelButton.style.pointerEvents = "auto";
+        // Reactivar botones
+        botones.forEach(btn => {
+            btn.style.opacity = "1";
+            btn.style.pointerEvents = "auto";
+        });
         event.target.value = ''; 
     }
-});
+}
+
+// Conectamos la misma función a ambos botones
+document.getElementById('cameraInput').addEventListener('change', procesarSubida);
+document.getElementById('galleryInput').addEventListener('change', procesarSubida);
 
 // --- LÓGICA DE LA GALERÍA ---
 async function loadGallery() {
