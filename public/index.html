@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Evita que el usuario haga zoom por accidente, dándole sensación de "App nativa" -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Galería del Evento</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            text-align: center;
+            background-color: #1a1a1a;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        h1 { margin-bottom: 5px; }
+        p { color: #aaaaaa; margin-bottom: 50px; }
+        .cam-button {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(255, 71, 87, 0.4);
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .cam-button:active { transform: scale(0.95); }
+        /* Ocultamos el feo botón nativo del navegador */
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+    <h1>📸 Galería en Vivo</h1>
+    <p>Sube tu mejor momento sin perder calidad</p>
+
+    <div>
+        <label class="cam-button" for="cameraInput">
+            📷 Tomar Foto
+        </label>
+        <!-- El atributo 'capture' abre la cámara saltándose el explorador de archivos -->
+        <input type="file" id="cameraInput" accept="image/*" capture="environment">
+    </div>
+
+</body>
+</html>
