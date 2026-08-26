@@ -39,20 +39,35 @@
     </style>
 </head>
 <body>
-    <h1>📸 Galería en Vivo</h1>
-    <p>Sube tu mejor momento sin perder calidad</p>
-
-    <div>
-        <label class="cam-button" for="cameraInput">
-            📷 Tomar Foto
-        </label>
-        <input type="file" id="cameraInput" accept="image/*" capture="environment">
+    <!-- VISTA 1: ONBOARDING (Se oculta automáticamente si ya tienen nombre) -->
+    <div id="loginView">
+        <h1>¡Bienvenido al Evento!</h1>
+        <p>¿Cómo te llamas o cuál es tu apodo?</p>
+        <input type="text" id="usernameInput" placeholder="Ej: Tío Juan, Ana..." 
+               style="padding: 15px; font-size: 18px; border-radius: 8px; border: none; width: 80%; max-width: 300px; margin-bottom: 20px; text-align: center;">
+        <br>
+        <button onclick="saveUser()" class="cam-button" style="background-color: #0be881;">Entrar a la Galería</button>
     </div>
 
-    <!-- NUEVO: Aquí mostraremos si está subiendo o si hubo éxito -->
-    <h3 id="statusText" style="margin-top: 30px; transition: 0.3s;"></h3>
+    <!-- VISTA 2: APLICACIÓN Y CÁMARA (Oculta por defecto) -->
+    <div id="appView" style="display: none;">
+        <h1 id="greetingText">📸 Galería en Vivo</h1>
+        <p>Sube tu mejor momento sin perder calidad</p>
 
-    <!-- NUEVO: Conectamos la lógica -->
+        <div>
+            <label class="cam-button" for="cameraInput">
+                📷 Tomar Foto
+            </label>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment">
+        </div>
+
+        <h3 id="statusText" style="margin-top: 30px; transition: 0.3s;"></h3>
+
+        <!-- Contenedor dinámico de la galería -->
+        <div id="gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 40px; padding-bottom: 50px;">
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

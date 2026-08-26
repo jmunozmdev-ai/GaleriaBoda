@@ -1,29 +1,54 @@
+// --- LÓGICA DE USUARIO ---
+// Revisamos si el usuario ya se había registrado antes en este celular
+const savedUser = localStorage.getItem('galeria_user');
+if (savedUser) {
+    activarApp(savedUser);
+}
+
+function saveUser() {
+    const name = document.getElementById('usernameInput').value;
+    if (name.trim() === '') {
+        alert("Por favor, ingresa tu nombre para continuar.");
+        return;
+    }
+    // Guardamos el nombre en el navegador del celular
+    localStorage.setItem('galeria_user', name.trim());
+    activarApp(name.trim());
+}
+
+function activarApp(nombre) {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('appView').style.display = 'block';
+    document.getElementById('greetingText').innerText = `📸 Hola, ${nombre}`;
+    loadGallery(); // Cargamos las fotos en cuanto entran
+}
+
+// --- LÓGICA DE SUBIDA DE CÁMARA ---
 document.getElementById('cameraInput').addEventListener('change', async (event) => {
     const file = event.target.files[0];
-    if (!file) return; // Si el usuario cancela la cámara, no hacemos nada
+    if (!file) return;
 
+    const currentUser = localStorage.getItem('galeria_user') || 'Anónimo';
     const statusText = document.getElementById('statusText');
     const labelButton = document.querySelector('.cam-button');
     
-    // UX: Mostramos al usuario que estamos trabajando
-    statusText.innerText = "⏳ Subiendo tu foto... por favor espera";
-    statusText.style.color = "#ffdd59"; // Amarillo
+    statusText.innerText = "⏳ Subiendo tu foto...";
+    statusText.style.color = "#ffdd59";
     labelButton.style.opacity = "0.5";
-    labelButton.style.pointerEvents = "none"; // Desactivamos el botón temporalmente
+    labelButton.style.pointerEvents = "none";
 
     try {
-        // PASO 1: Pedirle permiso (firma) a nuestro backend Node.js
-        const signResponse = await fetch('/api/sign');
+        // Le pasamos el nombre al backend para que firme la foto con él
+        const signResponse = await fetch(`/api/sign?user=${encodeURIComponent(currentUser)}`);
         const signData = await signResponse.json();
 
-        // PASO 2: Armar el paquete de datos para Cloudinary
         const formData = new FormData();
         formData.append("file", file);
         formData.append("api_key", signData.apiKey);
         formData.append("timestamp", signData.timestamp);
         formData.append("signature", signData.signature);
+        formData.append("context", signData.context); // <-- Adjuntamos el metadato del autor
 
-        // PASO 3: Enviar la imagen PESADA directamente a los servidores de Cloudinary
         const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloudName}/image/upload`, {
             method: "POST",
             body: formData
@@ -31,24 +56,65 @@ document.getElementById('cameraInput').addEventListener('change', async (event) 
 
         const uploadData = await uploadResponse.json();
 
-        // PASO 4: Validar el éxito
         if (uploadData.secure_url) {
-            statusText.innerText = "✅ ¡Foto subida con éxito!";
-            statusText.style.color = "#0be881"; // Verde
-            console.log("URL de la foto:", uploadData.secure_url);
+            statusText.innerText = "✅ ¡Foto subida!";
+            statusText.style.color = "#0be881";
+            loadGallery(); // Recargamos la galería para ver la nueva foto
         } else {
-            throw new Error("Cloudinary no devolvió una URL válida");
+            throw new Error("Error en Cloudinary");
         }
     } catch (error) {
-        console.error(error);
-        statusText.innerText = "❌ Hubo un error al subir la foto. Intenta de nuevo.";
-        statusText.style.color = "#ff4757"; // Rojo
+        statusText.innerText = "❌ Error al subir. Intenta de nuevo.";
+        statusText.style.color = "#ff4757";
     } finally {
-        // UX: Restauramos el botón para que puedan tomar otra foto
         labelButton.style.opacity = "1";
         labelButton.style.pointerEvents = "auto";
-        
-        // Limpiamos el input para que detecte si suben la misma foto dos veces
         event.target.value = ''; 
     }
 });
+
+// --- LÓGICA DE LA GALERÍA ---
+async function loadGallery() {
+    const galleryDiv = document.getElementById('gallery');
+    galleryDiv.innerHTML = '<p>Cargando fotos...</p>';
+
+    try {
+        const response = await fetch('/api/photos');
+        const photos = await response.json();
+
+        galleryDiv.innerHTML = '';
+
+        if (photos.length === 0) {
+            galleryDiv.innerHTML = '<p>No hay fotos aún. ¡Sé el primero!</p>';
+            return;
+        }
+
+        photos.forEach(photo => {
+            // Creamos un contenedor para la foto y el nombre del autor
+            const itemDiv = document.createElement('div');
+            itemDiv.style.backgroundColor = "#2a2a2a";
+            itemDiv.style.borderRadius = "8px";
+            itemDiv.style.padding = "5px";
+            itemDiv.style.textAlign = "center";
+
+            const img = document.createElement('img');
+            img.src = photo.url;
+            img.style.width = "100%";
+            img.style.height = "150px";
+            img.style.objectFit = "cover";
+            img.style.borderRadius = "5px";
+
+            const autorText = document.createElement('p');
+            autorText.innerText = `📸 ${photo.autor}`;
+            autorText.style.margin = "5px 0";
+            autorText.style.fontSize = "14px";
+            autorText.style.color = "#ddd";
+
+            itemDiv.appendChild(img);
+            itemDiv.appendChild(autorText);
+            galleryDiv.appendChild(itemDiv);
+        });
+    } catch (error) {
+        galleryDiv.innerHTML = '<p>Error al cargar la galería.</p>';
+    }
+}
