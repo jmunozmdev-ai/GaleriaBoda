@@ -107,8 +107,17 @@ async function loadGallery() {
             itemDiv.style.padding = "5px";
             itemDiv.style.textAlign = "center";
 
+            // NUEVO: Separamos la versión pesada de la versión ligera
+            const urlOriginal = photo.url;
+            const urlMiniatura = photo.url.replace('/upload/', '/upload/w_400,c_fill,q_auto,f_auto/');
+
+            // NUEVO: Creamos un enlace para poder hacer clic en la foto
+            const link = document.createElement('a');
+            link.href = urlOriginal;
+            link.target = "_blank"; // Abre la foto original en una pestaña nueva
+
             const img = document.createElement('img');
-            img.src = photo.url;
+            img.src = urlMiniatura; // Mostramos la miniatura ligera en la cuadrícula
             img.style.width = "100%";
             img.style.height = "150px";
             img.style.objectFit = "cover";
@@ -120,7 +129,9 @@ async function loadGallery() {
             autorText.style.fontSize = "14px";
             autorText.style.color = "#ddd";
 
-            itemDiv.appendChild(img);
+            // NUEVO: Metemos la imagen dentro del enlace, y todo al contenedor
+            link.appendChild(img);
+            itemDiv.appendChild(link);
             itemDiv.appendChild(autorText);
             galleryDiv.appendChild(itemDiv);
         });
