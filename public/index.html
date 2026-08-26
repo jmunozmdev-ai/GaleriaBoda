@@ -39,7 +39,6 @@
     </style>
 </head>
 <body>
-
     <h1>📸 Galería en Vivo</h1>
     <p>Sube tu mejor momento sin perder calidad</p>
 
@@ -47,9 +46,13 @@
         <label class="cam-button" for="cameraInput">
             📷 Tomar Foto
         </label>
-        <!-- El atributo 'capture' abre la cámara saltándose el explorador de archivos -->
         <input type="file" id="cameraInput" accept="image/*" capture="environment">
     </div>
 
+    <!-- NUEVO: Aquí mostraremos si está subiendo o si hubo éxito -->
+    <h3 id="statusText" style="margin-top: 30px; transition: 0.3s;"></h3>
+
+    <!-- NUEVO: Conectamos la lógica -->
+    <script src="app.js"></script>
 </body>
 </html>
